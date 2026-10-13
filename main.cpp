@@ -5,6 +5,8 @@
 #include "MT4.h"
 #include <algorithm>
 #include <imgui.h>
+#include <chrono>
+#include <cmath>
 
 const char kWindowTitle[] = "LE2B_09_コウサカ_タカフミ";
 
@@ -15,11 +17,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, 1280, 720);
-	Spherical s{ 6.f,0.f,halfPi };
-	Vector3 pos = ToCartesian(s);
 
-	Vector3 target = { 0.f,0.f,0.f };
+	// 円A
+	Vector2 circleA{ 0.0f, 0.0f };
+	const float radiusA = 12.0f;
 
+	// 円B
+	Vector2 circleB{ 640.0f, 360.0f };
+	const float radiusB = 20.0f;
+
+	// 追従速度
+	float speed = 6.0f;
+
+	const float kDeltaTime = 1.0f / 60.0f;
 
 	// キー入力結果を受け取る箱
 	char keys[256] = { 0 };
@@ -27,6 +37,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
+		// 今回の先頭時刻との差から秒（float）を算出
+	
 		// フレームの開始
 		Novice::BeginFrame();
 
@@ -38,51 +50,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		/// ↓更新処理ここから
 		///
 
-		Vector3 eye = target + ToCartesian(s);
+		int mouseX = 0;
+		int mouseY = 0;
+		Novice::GetMousePosition(&mouseX, &mouseY);
+		circleA = { static_cast<float>(mouseX), static_cast<float>(mouseY) };
 
-		Vector3 worldUp{ 0.f,1.f,0.f };
-		Vector3 forward = Normalize(target - eye);
-		Vector3 right = Normalize(Cross(worldUp, forward));
-		Vector3 up = Cross(forward, right);
-
-		Matrix4x4 cameraMatrix{ {
-			{right.x,right.y,right.z,0.f},
-			{up.x,up.y,up.z,0.f},
-			{forward.x,forward.y,forward.z,0.f},
-			{eye.x,eye.y,eye.z,1.f}
-		} };
-
-		const float limit =
-			std::numbers::pi_v<float> / 2.f - 0.01f;
-		s.radius = (std::max)(s.radius, 0.1f);
-		s.theta = std::clamp(s.theta, -limit, limit);
+		float t = speed * kDeltaTime;
+		circleB.x += t * (circleA.x - circleB.x);
+		circleB.y += t * (circleA.y - circleB.y);
 
 #ifdef USE_IMGUI
-		ImGui::Begin("Camera");
-
-		ImGui::DragFloat3("target", &target.x, 0.01f);
-		ImGui::Separator();
-
-		ImGui::DragFloat("radius", &s.radius, 0.01f, 0.1f, 100.0f);
-		ImGui::SliderFloat("theta", &s.theta, -limit, limit);
-		ImGui::DragFloat("phi", &s.phi, 0.01f);
-		ImGui::Separator();
-
-		ImGui::Text("eye     : %.2f, %.2f, %.2f", eye.x, eye.y, eye.z);
-		ImGui::Text("forward : %.2f, %.2f, %.2f", forward.x, forward.y, forward.z);
-		ImGui::Text("right   : %.2f, %.2f, %.2f", right.x, right.y, right.z);
-		ImGui::Text("up      : %.2f, %.2f, %.2f", up.x, up.y, up.z);
-		ImGui::Separator();
-
-		ImGui::Text("cameraMatrix");
-		for (int row = 0; row < 4; ++row) {
-			ImGui::Text("%6.2f %6.2f %6.2f %6.2f",
-				cameraMatrix.m[row][0], cameraMatrix.m[row][1], cameraMatrix.m[row][2], cameraMatrix.m[row][3]);
-		}
-
+		ImGui::Begin("Follow");
+		ImGui::SliderFloat("speed", &speed, 0.0f, 60.0f);
 		ImGui::End();
 #endif
-
+		
 		///
 		/// ↑更新処理ここまで
 		///
@@ -90,6 +72,22 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		///
 		/// ↓描画処理ここから
 		///
+
+		Novice::DrawEllipse(
+			static_cast<int>(circleA.x), static_cast<int>(circleA.y),
+			static_cast<int>(radiusA), static_cast<int>(radiusA),
+			0.0f, RED, kFillModeSolid);
+		
+		Novice::DrawEllipse(
+			static_cast<int>(circleB.x), static_cast<int>(circleB.y),
+			static_cast<int>(radiusB), static_cast<int>(radiusB),
+			0.0f, GREEN, kFillModeSolid);
+
+		Novice::DrawLine(
+			static_cast<int>(circleA.x), static_cast<int>(circleA.y),
+			static_cast<int>(circleB.x), static_cast<int>(circleB.y),
+			WHITE);
+
 
 		///
 		/// ↑描画処理ここまで
