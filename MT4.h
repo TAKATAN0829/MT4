@@ -86,6 +86,13 @@ struct Spherical {
 	float phi;
 };
 
+// Quaternion
+struct Quaternion {
+	float x;
+	float y;
+	float z;
+	float w;
+};
 
 //=================================================================================================//
 // Vector3
@@ -211,7 +218,7 @@ bool IsCollision(const AABB& aabb, const Ray& ray);
 
 bool IsCollision(const AABB& aabb, const Line& line);
 
-bool IsCollision(const OBB& obb, const Sphere &sphere);
+bool IsCollision(const OBB& obb, const Sphere& sphere);
 
 bool IsCollision(const Segment& segment, const OBB& obb);
 
@@ -227,7 +234,7 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 
 void DrawAABB(const AABB& aabb1, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color);
 
-void DrawOBB(const OBB&obb,const Matrix4x4 & viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color);
+void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color);
 
 void DrawSphere(const Sphere& sphere, const Matrix4x4 viewProjectionMatrix, const Matrix4x4 viewportMatrix, unsigned int color);
 
@@ -235,6 +242,21 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 
 void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, unsigned int color);
 
+//=================================================================================================//
+// Quaternion
 
+Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs);
+
+Quaternion IdentityQuaternion();
+
+Quaternion Conjugate(const Quaternion& quaternion);
+
+float Norm(const Quaternion& quaternion);
+
+Quaternion Normalize(const Quaternion& quaternion);
+
+Quaternion Inverse(const Quaternion& quaternion);
+
+void QuaternionScreenPrintf(int x, int y, const Quaternion& quaternion, const char* label);
 
 

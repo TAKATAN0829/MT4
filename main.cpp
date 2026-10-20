@@ -18,18 +18,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, 1280, 720);
 
-	// 円A
-	Vector2 circleA{ 0.0f, 0.0f };
-	const float radiusA = 12.0f;
-
-	// 円B
-	Vector2 circleB{ 640.0f, 360.0f };
-	const float radiusB = 20.0f;
-
-	// 追従速度
-	float speed = 6.0f;
-
-	const float kDeltaTime = 1.0f / 60.0f;
+	Quaternion q1 = { 2.0f, 3.0f, 4.0f, 1.0f };
+	Quaternion q2 = { 1.0f, 3.0f, 5.0f, 2.0f };
+	Quaternion identity = IdentityQuaternion();
+	Quaternion conj = Conjugate(q1);
+	Quaternion inv = Inverse(q1);
+	Quaternion normal = Normalize(q1);
+	Quaternion mul1 = Multiply(q1, q2);
+	Quaternion mul2 = Multiply(q2, q1);
+	float norm = Norm(q1);
 
 	// キー入力結果を受け取る箱
 	char keys[256] = { 0 };
@@ -50,20 +47,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		/// ↓更新処理ここから
 		///
 
-		int mouseX = 0;
-		int mouseY = 0;
-		Novice::GetMousePosition(&mouseX, &mouseY);
-		circleA = { static_cast<float>(mouseX), static_cast<float>(mouseY) };
-
-		float t = speed * kDeltaTime;
-		circleB.x += t * (circleA.x - circleB.x);
-		circleB.y += t * (circleA.y - circleB.y);
-
-#ifdef USE_IMGUI
-		ImGui::Begin("Follow");
-		ImGui::SliderFloat("speed", &speed, 0.0f, 60.0f);
-		ImGui::End();
-#endif
 		
 		///
 		/// ↑更新処理ここまで
@@ -73,20 +56,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		/// ↓描画処理ここから
 		///
 
-		Novice::DrawEllipse(
-			static_cast<int>(circleA.x), static_cast<int>(circleA.y),
-			static_cast<int>(radiusA), static_cast<int>(radiusA),
-			0.0f, RED, kFillModeSolid);
-		
-		Novice::DrawEllipse(
-			static_cast<int>(circleB.x), static_cast<int>(circleB.y),
-			static_cast<int>(radiusB), static_cast<int>(radiusB),
-			0.0f, GREEN, kFillModeSolid);
-
-		Novice::DrawLine(
-			static_cast<int>(circleA.x), static_cast<int>(circleA.y),
-			static_cast<int>(circleB.x), static_cast<int>(circleB.y),
-			WHITE);
+		QuaternionScreenPrintf(0, kRowHeight * 0, identity, ": Identity");
+		QuaternionScreenPrintf(0, kRowHeight * 1, conj, ": Conjugate");
+		QuaternionScreenPrintf(0, kRowHeight * 2, inv, ": Inverse");
+		QuaternionScreenPrintf(0, kRowHeight * 3, normal, ": Normalize");
+		QuaternionScreenPrintf(0, kRowHeight * 4, mul1, ": Multiply(q1, q2)");
+		QuaternionScreenPrintf(0, kRowHeight * 5, mul2, ": Multiply(q2, q1)");
+		Novice::ScreenPrintf(0, kRowHeight * 6, "%.02f  : Norm", norm);
 
 
 		///

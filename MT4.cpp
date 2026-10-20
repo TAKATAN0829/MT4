@@ -1183,3 +1183,59 @@ void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, cons
 Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2) { return Add(m1, m2); }
 Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2) { return Subtract(m1, m2); }
 Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) { return Multiply(m1, m2); }
+
+//=================================================================================================//
+// Quaternion
+
+Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs) {
+	Quaternion result{
+		lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y, // x
+		lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x, // y
+		lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w, // z
+		lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z, // w
+	};
+	return result;
+}
+
+Quaternion IdentityQuaternion() {
+	return{ 0,0,0,1 };
+}
+
+Quaternion Conjugate(const Quaternion& quaternion) {
+	return { -quaternion.x,-quaternion.y,-quaternion.z,quaternion.w };
+}
+
+float Norm(const Quaternion& quaternion) {
+	return sqrtf(quaternion.w * quaternion.w + quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z);
+}
+
+Quaternion Normalize(const Quaternion& quaternion) {
+	float norm = Norm(quaternion);
+	if (norm == 0.0f) {
+		return quaternion;
+	}
+	return { quaternion.x / norm,quaternion.y / norm,quaternion.z / norm,quaternion.w / norm, };
+}
+
+Quaternion Inverse(const Quaternion& quaternion) {
+	float norm = Norm(quaternion);
+	float normSq = norm * norm; // ||q||^2
+	if (normSq == 0.0f) {
+		return quaternion;
+	}
+	Quaternion conj = Conjugate(quaternion);
+	return {
+		conj.x / normSq,
+		conj.y / normSq,
+		conj.z / normSq,
+		conj.w / normSq,
+	};
+}
+
+void QuaternionScreenPrintf(int x, int y, const Quaternion& quaternion, const char* label) {
+	Novice::ScreenPrintf(x, y, "%.02f", quaternion.x);
+	Novice::ScreenPrintf(x + kColumnWidth, y, "%.02f", quaternion.y);
+	Novice::ScreenPrintf(x + kColumnWidth * 2, y, "%.02f", quaternion.z);
+	Novice::ScreenPrintf(x + kColumnWidth * 3, y, "%.02f", quaternion.w);
+	Novice::ScreenPrintf(x + kColumnWidth * 4, y, "%s", label);
+}
