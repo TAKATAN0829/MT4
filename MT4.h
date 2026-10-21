@@ -259,4 +259,8 @@ Quaternion Inverse(const Quaternion& quaternion);
 
 void QuaternionScreenPrintf(int x, int y, const Quaternion& quaternion, const char* label);
 
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
 
+Vector3 RotateVector(const Vector3& vector, Quaternion& quaternion);
+
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion);

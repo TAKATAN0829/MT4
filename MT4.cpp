@@ -1239,3 +1239,38 @@ void QuaternionScreenPrintf(int x, int y, const Quaternion& quaternion, const ch
 	Novice::ScreenPrintf(x + kColumnWidth * 3, y, "%.02f", quaternion.w);
 	Novice::ScreenPrintf(x + kColumnWidth * 4, y, "%s", label);
 }
+
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
+	float s = std::sin(angle / 2.0f);
+	return { axis.x * s, axis.y * s, axis.z * s, std::cos(angle / 2.0f) };
+}
+
+Vector3 RotateVector(const Vector3& vector, Quaternion& quaternion) {
+	Quaternion r{ vector.x, vector.y, vector.z, 0.0f };
+	Quaternion result = Multiply(Multiply(quaternion, r), Inverse(quaternion));
+	return { result.x, result.y, result.z };
+}
+
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
+	Matrix4x4 result;
+	float quaternionWSq = quaternion.w * quaternion.w;
+	float quaternionXSq = quaternion.x * quaternion.x;
+	float quaternionYSq = quaternion.y * quaternion.y;
+	float quaternionZSq = quaternion.z * quaternion.z;
+
+	float quaternionWX = quaternion.w * quaternion.x;
+	float quaternionWY = quaternion.w * quaternion.y;
+	float quaternionWZ = quaternion.w * quaternion.z;
+	float quaternionXY = quaternion.x * quaternion.y;
+	float quaternionXZ = quaternion.x * quaternion.z;
+	float quaternionYZ = quaternion.y * quaternion.z;
+
+	result = { {
+		{(quaternionWSq + quaternionXSq - quaternionYSq - quaternionZSq),(2 * (quaternionXY + quaternionWZ)),(2 * (quaternionXZ - quaternionWY)),0 },
+		{(2 * (quaternionXY - quaternionWZ)),(quaternionWSq - quaternionXSq + quaternionYSq - quaternionZSq),(2 * (quaternionYZ + quaternionWX)),0},
+		{(2 * (quaternionXZ + quaternionWY)),(2 * (quaternionYZ - quaternionWX)),(quaternionWSq - quaternionXSq - quaternionYSq + quaternionZSq),0},
+		{0,0,0,1}
+	} };
+
+	return result;
+}
