@@ -1274,3 +1274,21 @@ Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
 
 	return result;
 }
+
+Quaternion DirectionToDirection(const Vector3& from, const Vector3& to) {
+    const float tolerance = 1.0e-6f;
+    float dot = Dot(from, to);
+
+    if (dot <= -1.0f + tolerance) {
+        Vector3 axis;
+        if (std::abs(from.x) > std::abs(from.z)) {
+            axis = Normalize(Vector3{ from.y, -from.x, 0.0f });
+        } else {
+            axis = Normalize(Vector3{ 0.0f, from.z, -from.y });
+        }
+        return Quaternion{ axis.x, axis.y, axis.z, 0.0f };
+    }
+  
+    Vector3 cross = Cross(from, to);
+    return Normalize(Quaternion{ cross.x, cross.y, cross.z, 1.0f + dot });
+}
