@@ -1292,3 +1292,33 @@ Quaternion DirectionToDirection(const Vector3& from, const Vector3& to) {
     Vector3 cross = Cross(from, to);
     return Normalize(Quaternion{ cross.x, cross.y, cross.z, 1.0f + dot });
 }
+
+// 球面線形補間
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
+
+	Quaternion start = q0;
+	float dot = q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
+	if (dot < 0.0f) {
+		start = { -q0.x, -q0.y, -q0.z, -q0.w };
+		dot = -dot;
+	}
+
+	dot = std::clamp(dot, 0.0f, 1.0f);
+
+	float scale0 = 1.0f - t;
+	float scale1 = t;
+	const float tolerance = 1.0e-6f;
+	if (dot < 1.0f - tolerance) {
+		float theta = std::acos(dot);
+		float sinTheta = std::sin(theta);
+		scale0 = std::sin((1.0f - t) * theta) / sinTheta;
+		scale1 = std::sin(t * theta) / sinTheta;
+	}
+
+	return {
+		scale0 * start.x + scale1 * q1.x,
+		scale0 * start.y + scale1 * q1.y,
+		scale0 * start.z + scale1 * q1.z,
+		scale0 * start.w + scale1 * q1.w,
+	};
+}

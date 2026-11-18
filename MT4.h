@@ -266,3 +266,6 @@ Vector3 RotateVector(const Vector3& vector, Quaternion& quaternion);
 Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion);
 
 Quaternion DirectionToDirection(const Vector3& from, const Vector3& to);
+
+// 球面線形補完
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t);

@@ -25,8 +25,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
-		// 今回の先頭時刻との差から秒（float）を算出
-
+	
 		// フレームの開始
 		Novice::BeginFrame();
 
@@ -37,15 +36,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		///
 		/// ↓更新処理ここから
 		///
-		Vector3 from0 = Normalize(Vector3{ 1.0f, 0.7f, 0.5f });
-		Vector3 to0 = -from0;
-		Vector3 from1 = Normalize(Vector3{ -0.6f, 0.9f, 0.2f });
-		Vector3 to1 = Normalize(Vector3{ 0.4f, 0.7f, -0.5f });
-		Matrix4x4 rotateMatrix0 = MakeRotateMatrix(DirectionToDirection(
-			Normalize(Vector3{ 1.0f, 0.0f, 0.0f }),
-			Normalize(Vector3{ -1.0f, 0.0f, 0.0f })));
-		Matrix4x4 rotateMatrix1 = MakeRotateMatrix(DirectionToDirection(from0, to0));
-		Matrix4x4 rotateMatrix2 = MakeRotateMatrix(DirectionToDirection(from1, to1));
+		
+		// 回転の球面線形補間
+		Quaternion rotation0 = MakeRotateAxisAngleQuaternion(Normalize(Vector3{ 0.71f, 0.71f, 0.0f }), 0.3f);
+		Quaternion rotation1 = MakeRotateAxisAngleQuaternion(Normalize(Vector3{ 0.71f, 0.0f, 0.71f }), 3.141592f);
+
+		Quaternion interpolate0 = Slerp(rotation0, rotation1, 0.0f);
+		Quaternion interpolate1 = Slerp(rotation0, rotation1, 0.3f);
+		Quaternion interpolate2 = Slerp(rotation0, rotation1, 0.5f);
+		Quaternion interpolate3 = Slerp(rotation0, rotation1, 0.7f);
+		Quaternion interpolate4 = Slerp(rotation0, rotation1, 1.0f);
 
 		///
 		/// ↑更新処理ここまで
@@ -55,9 +55,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		/// ↓描画処理ここから
 		///
 
-		MatrixScreenPrintf(0, 0, rotateMatrix0, "rotateMatrix0");
-		MatrixScreenPrintf(0, kRowHeight * 5, rotateMatrix1, "rotateMatrix1");
-		MatrixScreenPrintf(0, kRowHeight * 10, rotateMatrix2, "rotateMatrix2");
+		QuaternionScreenPrintf(0, 0, interpolate0, " : interpolate0, Slerp(q0, q1, 0.0f)");
+		QuaternionScreenPrintf(0, kRowHeight, interpolate1, " : interpolate1, Slerp(q0, q1, 0.3f)");
+		QuaternionScreenPrintf(0, kRowHeight * 2, interpolate2, " : interpolate2, Slerp(q0, q1, 0.5f)");
+		QuaternionScreenPrintf(0, kRowHeight * 3, interpolate3, " : interpolate3, Slerp(q0, q1, 0.7f)");
+		QuaternionScreenPrintf(0, kRowHeight * 4, interpolate4, " : interpolate4, Slerp(q0, q1, 1.0f)");
 
 		///
 		/// ↑描画処理ここまで
